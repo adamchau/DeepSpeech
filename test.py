@@ -14,8 +14,8 @@ from utils.utility import add_arguments, print_arguments
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 # yapf: disable
-add_arg('batch_size',       int,    128,    "Minibatch size.")
-add_arg('trainer_count',    int,    8,      "# of Trainers (CPUs or GPUs).")
+add_arg('batch_size',       int,    16,    "Minibatch size.")
+add_arg('trainer_count',    int,    1,      "# of Trainers (CPUs or GPUs).")
 add_arg('beam_size',        int,    500,    "Beam search width.")
 add_arg('num_proc_bsearch', int,    8,      "# of CPUs for beam search.")
 add_arg('num_proc_data',    int,    8,      "# of CPUs for data preprocessing.")
@@ -34,20 +34,20 @@ add_arg('test_manifest',   str,
         'data/librispeech/manifest.test-clean',
         "Filepath of manifest to evaluate.")
 add_arg('mean_std_path',    str,
-        'data/librispeech/mean_std.npz',
+        'models/baidu_cn1.2k/mean_std.npz',
         "Filepath of normalizer's mean & std.")
 add_arg('vocab_path',       str,
-        'data/librispeech/vocab.txt',
+        'models/baidu_cn1.2k/vocab.txt',
         "Filepath of vocabulary.")
 add_arg('model_path',       str,
-        './checkpoints/libri/params.latest.tar.gz',
+        'models/baidu_cn1.2k/params.tar.gz',
         "If None, the training starts from scratch, "
         "otherwise, it resumes from the pre-trained model.")
 add_arg('lang_model_path',  str,
         'models/lm/common_crawl_00.prune01111.trie.klm',
         "Filepath for language model.")
 add_arg('decoding_method',  str,
-        'ctc_beam_search',
+        'ctc_greedy',
         "Decoding method. Options: ctc_beam_search, ctc_greedy",
         choices = ['ctc_beam_search', 'ctc_greedy'])
 add_arg('error_rate_type',  str,

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Inferer for DeepSpeech2 model."""
 from __future__ import absolute_import
 from __future__ import division
@@ -14,35 +15,35 @@ from utils.utility import add_arguments, print_arguments
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 # yapf: disable
-add_arg('num_samples',      int,    10,     "# of samples to infer.")
-add_arg('trainer_count',    int,    8,      "# of Trainers (CPUs or GPUs).")
+add_arg('num_samples',      int,    20,    "# of samples to infer.")
+add_arg('trainer_count',    int,    1,      "# of Trainers (CPUs or GPUs).")
 add_arg('beam_size',        int,    500,    "Beam search width.")
-add_arg('num_proc_bsearch', int,    8,      "# of CPUs for beam search.")
+add_arg('num_proc_bsearch', int,    1,      "# of CPUs for beam search.")
 add_arg('num_conv_layers',  int,    2,      "# of convolution layers.")
 add_arg('num_rnn_layers',   int,    3,      "# of recurrent layers.")
 add_arg('rnn_layer_size',   int,    2048,   "# of recurrent cells per layer.")
 add_arg('alpha',            float,  2.5,    "Coef of LM for beam search.")
 add_arg('beta',             float,  0.3,    "Coef of WC for beam search.")
-add_arg('cutoff_prob',      float,  1.0,    "Cutoff probability for pruning.")
+add_arg('cutoff_prob',      float,  0.99,    "Cutoff probability for pruning.")
 add_arg('cutoff_top_n',     int,    40,     "Cutoff number for pruning.")
-add_arg('use_gru',          bool,   False,  "Use GRUs instead of simple RNNs.")
+add_arg('use_gru',          bool,   True,  "Use GRUs instead of simple RNNs.")
 add_arg('use_gpu',          bool,   True,   "Use GPU or not.")
-add_arg('share_rnn_weights',bool,   True,   "Share input-hidden weights across "
+add_arg('share_rnn_weights', bool,  False,  "Share input-hidden weights across "
                                             "bi-directional RNNs. Not for GRU.")
 add_arg('infer_manifest',   str,
-        'data/librispeech/manifest.dev-clean',
+        'data/aishell/test_pp.txt',
         "Filepath of manifest to infer.")
 add_arg('mean_std_path',    str,
-        'data/librispeech/mean_std.npz',
+        'models/baidu_cn1.2k/mean_std.npz',
         "Filepath of normalizer's mean & std.")
 add_arg('vocab_path',       str,
-        'data/librispeech/vocab.txt',
+        'models/baidu_cn1.2k/vocab.txt',
         "Filepath of vocabulary.")
 add_arg('lang_model_path',  str,
-        'models/lm/common_crawl_00.prune01111.trie.klm',
+        'models/lm/zh_giga.no_cna_cmn.prune01244.klm',
         "Filepath for language model.")
 add_arg('model_path',       str,
-        './checkpoints/libri/params.latest.tar.gz',
+        'models/baidu_cn1.2k/params.tar.gz',
         "If None, the training starts from scratch, "
         "otherwise, it resumes from the pre-trained model.")
 add_arg('decoding_method',  str,
@@ -76,7 +77,7 @@ def infer():
         min_batch_size=1,
         sortagrad=False,
         shuffle_method=None)
-    infer_data = batch_reader().next()
+    infer_data = next(batch_reader())
 
     ds2_model = DeepSpeech2Model(
         vocab_size=data_generator.vocab_size,
@@ -116,6 +117,8 @@ def infer():
     error_rate_func = cer if args.error_rate_type == 'cer' else wer
     target_transcripts = [data[1] for data in infer_data]
     for target, result in zip(target_transcripts, result_transcripts):
+        target = target.encode('utf-8')
+        result = result.encode('utf-8')
         print("\nTarget Transcription: %s\nOutput Transcription: %s" %
               (target, result))
         print("Current error rate [%s] = %f" %

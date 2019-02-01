@@ -1,0 +1,1 @@
+examples/aishell/run_infer_test.sh
